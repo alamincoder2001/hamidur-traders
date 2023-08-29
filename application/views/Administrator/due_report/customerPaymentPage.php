@@ -1,50 +1,62 @@
 <style>
-	.v-select{
+	.v-select {
 		margin-bottom: 5px;
 	}
-	.v-select.open .dropdown-toggle{
+
+	.v-select.open .dropdown-toggle {
 		border-bottom: 1px solid #ccc;
 	}
-	.v-select .dropdown-toggle{
+
+	.v-select .dropdown-toggle {
 		padding: 0px;
 		height: 25px;
 	}
-	.v-select input[type=search], .v-select input[type=search]:focus{
+
+	.v-select input[type=search],
+	.v-select input[type=search]:focus {
 		margin: 0px;
 	}
-	.v-select .vs__selected-options{
+
+	.v-select .vs__selected-options {
 		overflow: hidden;
-		flex-wrap:nowrap;
+		flex-wrap: nowrap;
 	}
-	.v-select .selected-tag{
+
+	.v-select .selected-tag {
 		margin: 2px 0px;
 		white-space: nowrap;
-		position:absolute;
+		position: absolute;
 		left: 0px;
 	}
-	.v-select .vs__actions{
-		margin-top:-5px;
+
+	.v-select .vs__actions {
+		margin-top: -5px;
 	}
-	.v-select .dropdown-menu{
+
+	.v-select .dropdown-menu {
 		width: auto;
-		overflow-y:auto;
+		overflow-y: auto;
 	}
-	#customerPayment label{
-		font-size:13px;
+
+	#customerPayment label {
+		font-size: 13px;
 	}
-	#customerPayment select{
+
+	#customerPayment select {
 		border-radius: 3px;
 		padding: 0;
 	}
-	#customerPayment .add-button{
+
+	#customerPayment .add-button {
 		padding: 2.5px;
 		width: 28px;
 		background-color: #298db4;
-		display:block;
+		display: block;
 		text-align: center;
 		color: white;
 	}
-	#customerPayment .add-button:hover{
+
+	#customerPayment .add-button:hover {
 		background-color: #41add6;
 		color: white;
 	}
@@ -97,8 +109,12 @@
 						<div class="form-group">
 							<label class="col-md-4 control-label">Due</label>
 							<label class="col-md-1">:</label>
-							<div class="col-md-7">
-								<input type="text" class="form-control" v-model="payment.CPayment_previous_due" disabled>
+							<div class="col-md-3">
+								<input type="text" class="form-control" v-model="due" readonly>
+							</div>
+							<label class="col-md-1 no-padding-left">Total</label>
+							<div class="col-md-3">
+								<input type="text" class="form-control" v-model="payment.CPayment_previous_due" readonly>
 							</div>
 						</div>
 					</div>
@@ -173,14 +189,14 @@
 								<button type="button" class="button edit" @click="window.location = `/paymentAndReport/${row.CPayment_id}`">
 									<i class="fa fa-file-o"></i>
 								</button>
-								<?php if($this->session->userdata('accountType') != 'u'){?>
-								<button type="button" class="button edit" @click="editPayment(row)">
-									<i class="fa fa-pencil"></i>
-								</button>
-								<button type="button" class="button" @click="deletePayment(row.CPayment_id)">
-									<i class="fa fa-trash"></i>
-								</button>
-								<?php }?>
+								<?php if ($this->session->userdata('accountType') != 'u') { ?>
+									<button type="button" class="button edit" @click="editPayment(row)">
+										<i class="fa fa-pencil"></i>
+									</button>
+									<button type="button" class="button" @click="deletePayment(row.CPayment_id)">
+										<i class="fa fa-trash"></i>
+									</button>
+								<?php } ?>
 							</td>
 						</tr>
 					</template>
@@ -191,17 +207,17 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url();?>assets/js/vue/vue.min.js"></script>
-<script src="<?php echo base_url();?>assets/js/vue/axios.min.js"></script>
-<script src="<?php echo base_url();?>assets/js/vue/vuejs-datatable.js"></script>
-<script src="<?php echo base_url();?>assets/js/vue/vue-select.min.js"></script>
-<script src="<?php echo base_url();?>assets/js/moment.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/vue/vue.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/vue/axios.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/vue/vuejs-datatable.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/vue/vue-select.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/moment.min.js"></script>
 
 <script>
 	Vue.component('v-select', VueSelect.VueSelect);
 	new Vue({
 		el: '#customerPayment',
-		data(){
+		data() {
 			return {
 				payment: {
 					CPayment_id: 0,
@@ -213,7 +229,8 @@
 					CPayment_amount: '',
 					CPayment_discount: 0,
 					CPayment_notes: '',
-					CPayment_previous_due: 0
+					CPayment_previous_due: 0,
+					due_previous: 0
 				},
 				discountPercent: 0,
 				payments: [],
@@ -223,88 +240,143 @@
 					Customer_Name: ''
 				},
 				accounts: [],
-                selectedAccount: null,
-				userType: '<?php echo $this->session->userdata("accountType");?>',
-				
-				columns: [
-                    { label: 'Transaction Id', field: 'CPayment_invoice', align: 'center' },
-                    { label: 'Date', field: 'CPayment_date', align: 'center' },
-                    { label: 'Customer', field: 'Customer_Name', align: 'center' },
-                    { label: 'Transaction Type', field: 'transaction_type', align: 'center' },
-                    { label: 'Payment by', field: 'payment_by', align: 'center' },
-                    { label: 'Amount', field: 'CPayment_amount', align: 'center' },
-                    { label: 'Discount', field: 'CPayment_discount', align: 'center' },
-                    { label: 'Description', field: 'CPayment_notes', align: 'center' },
-                    { label: 'Saved By', field: 'CPayment_Addby', align: 'center' },
-                    { label: 'Action', align: 'center', filterable: false }
-                ],
-                page: 1,
-                per_page: 10,
-                filter: ''
+				selectedAccount: null,
+				installmentDue: 0,
+				due: 0,
+				userType: '<?php echo $this->session->userdata("accountType"); ?>',
+
+				columns: [{
+						label: 'Transaction Id',
+						field: 'CPayment_invoice',
+						align: 'center'
+					},
+					{
+						label: 'Date',
+						field: 'CPayment_date',
+						align: 'center'
+					},
+					{
+						label: 'Customer',
+						field: 'Customer_Name',
+						align: 'center'
+					},
+					{
+						label: 'Transaction Type',
+						field: 'transaction_type',
+						align: 'center'
+					},
+					{
+						label: 'Payment by',
+						field: 'payment_by',
+						align: 'center'
+					},
+					{
+						label: 'Amount',
+						field: 'CPayment_amount',
+						align: 'center'
+					},
+					{
+						label: 'Discount',
+						field: 'CPayment_discount',
+						align: 'center'
+					},
+					{
+						label: 'Description',
+						field: 'CPayment_notes',
+						align: 'center'
+					},
+					{
+						label: 'Saved By',
+						field: 'CPayment_Addby',
+						align: 'center'
+					},
+					{
+						label: 'Action',
+						align: 'center',
+						filterable: false
+					}
+				],
+				page: 1,
+				per_page: 10,
+				filter: ''
 			}
 		},
 		computed: {
-            filteredAccounts(){
-                let accounts = this.accounts.filter(account => account.status == '1');
-                return accounts.map(account => {
-                    account.display_text = `${account.account_name} - ${account.account_number} (${account.bank_name})`;
-                    return account;
-                })
-            },
-        },
-		created(){
+			filteredAccounts() {
+				let accounts = this.accounts.filter(account => account.status == '1');
+				return accounts.map(account => {
+					account.display_text = `${account.account_name} - ${account.account_number} (${account.bank_name})`;
+					return account;
+				})
+			},
+		},
+		created() {
 			this.getCustomers();
 			this.getAccounts();
 			this.getCustomerPayments();
 		},
-		methods:{
-			getCustomerPayments(){
+		methods: {
+			getCustomerPayments() {
 				let data = {
 					dateFrom: this.payment.CPayment_date,
 					dateTo: this.payment.CPayment_date
 				}
 				axios.post('/get_customer_payments', data).then(res => {
-					this.payments = res.data;
+					this.payments = res.data.filter(pay => pay.CPayment_SaleInvoice == null);
 				})
 			},
 
-			getCustomers(){
+			getCustomers() {
 				axios.get('/get_customers').then(res => {
 					this.customers = res.data;
 				})
 			},
 
-			getCustomerDue(){
-				if(event.type == "click"){
+			async getCustomerDue() {
+				if (event.type == "click") {
 					return;
 				}
-				if(this.selectedCustomer == null || this.selectedCustomer.Customer_SlNo == undefined){
+				if (this.selectedCustomer == null || this.selectedCustomer.Customer_SlNo == undefined) {
 					return;
 				}
 
-				axios.post('/get_customer_due', {customerId: this.selectedCustomer.Customer_SlNo}).then(res => {
+				await axios.post('/get_customer_due', {
+					customerId: this.selectedCustomer.Customer_SlNo
+				}).then(res => {
 					this.payment.CPayment_previous_due = res.data[0].dueAmount;
+				})
+
+				await axios.post('/get_installment_due', {
+					customerId: this.selectedCustomer.Customer_SlNo
+				}).then(res => {
+					this.installmentDue = res.data.reduce((acc, pre) => {
+						return acc + pre.installments.reduce((ac, pr) => {
+							return ac + +parseFloat(pr.install_due)
+						}, 0)
+					}, 0).toFixed(2);
+
+					this.due = parseFloat(parseFloat(this.payment.CPayment_previous_due) - parseFloat(this.installmentDue)).toFixed(2)
 				})
 			},
 
-			getAccounts(){
-                axios.get('/get_bank_accounts')
-                .then(res => {
-                    this.accounts = res.data;
-                })
-            },
+			getAccounts() {
+				axios.get('/get_bank_accounts')
+					.then(res => {
+						this.accounts = res.data;
+					})
+			},
 
 			calculateDiscount() {
 				if (event.target.id == 'discountPercent') {
-					this.payment.CPayment_discount = ((parseFloat(this.payment.CPayment_previous_due) * parseFloat(this.discountPercent)) / 100).toFixed(2);
+					this.payment.CPayment_discount = ((parseFloat(this.due) * parseFloat(this.discountPercent)) / 100).toFixed(2);
 				} else {
-					this.discountPercent = (parseFloat(this.payment.CPayment_discount) / parseFloat(this.payment.CPayment_previous_due) * 100).toFixed(2);
+					this.discountPercent = (parseFloat(this.payment.CPayment_discount) / parseFloat(this.due) * 100).toFixed(2);
 				}
 			},
 
-			saveCustomerPayment(){
-				if(this.payment.CPayment_Paymentby == 'bank'){
-					if(this.selectedAccount == null){
+			saveCustomerPayment() {
+				if (this.payment.CPayment_Paymentby == 'bank') {
+					if (this.selectedAccount == null) {
 						alert('Select an account');
 						return;
 					} else {
@@ -313,36 +385,49 @@
 				} else {
 					this.payment.account_id = null;
 				}
-				if(this.selectedCustomer == null || this.selectedCustomer.Customer_SlNo == undefined){
+				if (this.selectedCustomer == null || this.selectedCustomer.Customer_SlNo == undefined) {
 					alert('Select Customer');
 					return;
 				}
 
+				if (parseFloat(this.due) == 0) {
+					console.log(this.due);
+					alert("Due amount empty");
+					return
+				}
+				if (this.payment.CPayment_TransactionType == 'CR' && parseFloat(this.due) < parseFloat(this.payment.CPayment_amount)) {
+					alert("Payment amount less than due");
+					return
+				}
+
+				this.payment.due_previous = this.due;
 				this.payment.CPayment_customerID = this.selectedCustomer.Customer_SlNo;
 
 				let url = '/add_customer_payment';
-				if(this.payment.CPayment_id != 0){
+				if (this.payment.CPayment_id != 0) {
 					url = '/update_customer_payment';
 				}
 				axios.post(url, this.payment).then(res => {
 					let r = res.data;
 					alert(r.message);
-					if(r.success){
+					if (r.success) {
 						this.resetForm();
 						this.getCustomerPayments();
 						let invoiceConfirm = confirm('Do you want to view invoice?');
-						if(invoiceConfirm == true){
-							window.open('/paymentAndReport/'+r.paymentId, '_blank');
+						if (invoiceConfirm == true) {
+							window.open('/paymentAndReport/' + r.paymentId, '_blank');
 						}
 					}
 				})
 			},
 
-			editPayment(payment){
+			editPayment(payment) {
 				let keys = Object.keys(this.payment);
 				keys.forEach(key => {
 					this.payment[key] = payment[key];
 				})
+				this.due = payment.due_previous
+				this.discountPercent = (parseFloat(payment.CPayment_discount) / parseFloat(this.due) * 100)
 
 				this.selectedCustomer = {
 					Customer_SlNo: payment.CPayment_customerID,
@@ -350,7 +435,7 @@
 					display_name: `${payment.CPayment_customerID} - ${payment.Customer_Name}`
 				}
 
-				if(payment.CPayment_Paymentby == 'bank'){
+				if (payment.CPayment_Paymentby == 'bank') {
 					this.selectedAccount = {
 						account_id: payment.account_id,
 						account_name: payment.account_name,
@@ -360,33 +445,38 @@
 					}
 				}
 			},
-			
-			deletePayment(paymentId){
+
+			deletePayment(paymentId) {
 				let deleteConfirm = confirm('Are you sure?');
-				if(deleteConfirm == false){
+				if (deleteConfirm == false) {
 					return;
 				}
-				axios.post('/delete_customer_payment', {paymentId: paymentId}).then(res => {
+				axios.post('/delete_customer_payment', {
+					paymentId: paymentId
+				}).then(res => {
 					let r = res.data;
 					alert(r.message);
-					if(r.success){
+					if (r.success) {
 						this.getCustomerPayments();
 					}
 				})
 			},
 
-			resetForm(){
+			resetForm() {
 				this.payment.CPayment_id = 0;
 				this.payment.CPayment_customerID = '';
 				this.payment.CPayment_amount = '';
+				this.payment.CPayment_discount = 0;
 				this.payment.CPayment_notes = '';
-				
+				this.discountPercent = 0
+
 				this.selectedCustomer = {
 					display_name: 'Select Customer',
 					Customer_Name: ''
 				}
-				
+
 				this.payment.CPayment_previous_due = 0;
+				this.due = 0;
 			}
 		}
 	})

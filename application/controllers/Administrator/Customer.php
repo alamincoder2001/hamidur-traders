@@ -918,8 +918,14 @@ class Customer extends CI_Controller
                         where cp.CPayment_status = 'a'
                         and cp.installment_id = ci.installment_id
                     ) as install_paid,
+                    (
+                        SELECT ifnull(sum(cp.CPayment_discount),0)
+                        FROM tbl_customer_payment cp
+                        where cp.CPayment_status = 'a'
+                        and cp.installment_id = ci.installment_id
+                    ) as install_discount,
                     
-                    (SELECT ci.installment_amount - install_paid) as install_due
+                    (SELECT ci.installment_amount - (install_paid+install_discount)) as install_due
             
                     FROM tbl_customer_installments ci
                     WHERE ci.status = 'a'

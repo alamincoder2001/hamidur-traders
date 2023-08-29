@@ -184,6 +184,7 @@
 							<td>{{ row.Customer_Name }}</td>
 							<td>{{ row.Customer_Mobile }}</td>
 							<td>{{ row.CPayment_amount }}</td>
+							<td>{{ row.CPayment_discount }}</td>
 							<td>{{ row.CPayment_Addby }}</td>
 							<td>
 								<?php if ($this->session->userdata('accountType') != 'u') { ?>
@@ -251,6 +252,7 @@
 				},
 				accounts: [],
 				selectedAccount: null,
+				editPress: "",
 				userType: '<?php echo $this->session->userdata("accountType"); ?>',
 
 				columns: [{
@@ -279,6 +281,11 @@
 						align: 'center'
 					},
 					{
+						label: 'Installment Discount',
+						field: 'CPayment_discount',
+						align: 'center'
+					},
+					{
 						label: 'Saved By',
 						field: 'CPayment_Addby',
 						align: 'center'
@@ -296,7 +303,7 @@
 		},
 		watch: {
 			installment(installment) {
-				if (installment.installment_id == '') {
+				if (installment.installment_id == '' || this.editPress != "") {
 					return;
 				}
 				if (this.payment.CPayment_id == '') {
@@ -330,7 +337,7 @@
 					dateTo: this.payment.CPayment_date
 				}
 				axios.post('/get_customer_payments', data).then(res => {
-					this.payments = res.data;
+					this.payments = res.data.filter(pay => pay.CPayment_SaleInvoice != null);
 				})
 			},
 
@@ -371,7 +378,6 @@
 				}).then(res => {
 					this.invoices = res.data;
 				})
-				// console.log('calling getCustomerInvoices');
 			},
 
 			async getCustomerInstallment() {
@@ -390,8 +396,6 @@
 					installment_number: 'Select'
 				}
 				this.due = 0
-
-				// console.log('calling getCustomerInstallment');
 			},
 
 			getAccounts() {
@@ -403,9 +407,9 @@
 
 			calculateDiscount() {
 				if (event.target.id == 'discountPercent') {
-					this.payment.CPayment_discount = ((parseFloat(this.payment.CPayment_previous_due) * parseFloat(this.discountPercent)) / 100).toFixed(2);
+					this.payment.CPayment_discount = ((parseFloat(this.due) * parseFloat(this.discountPercent)) / 100).toFixed(2);
 				} else {
-					this.discountPercent = (parseFloat(this.payment.CPayment_discount) / parseFloat(this.payment.CPayment_previous_due) * 100).toFixed(2);
+					this.discountPercent = (parseFloat(this.payment.CPayment_discount) / parseFloat(this.due) * 100).toFixed(2);
 				}
 			},
 
@@ -437,7 +441,12 @@
 					alert('Amount is required');
 					return;
 				}
+				if (this.payment.CPayment_TransactionType == 'CR' && parseFloat(this.payment.CPayment_amount) > parseFloat(this.due)) {
+					alert('Payment amount must be less than due amount');
+					return;
+				}
 
+				this.payment.due_previous = this.due;
 				this.payment.CPayment_customerID = this.selectedCustomer.Customer_SlNo;
 				this.payment.CPayment_SaleInvoice = this.selectedInvoice.SaleMaster_InvoiceNo
 
@@ -445,9 +454,6 @@
 				if (this.payment.CPayment_id != 0) {
 					url = '/update_customer_payment';
 				}
-
-				// console.log(this.payment);
-				// return;
 
 				axios.post(url, this.payment).then(res => {
 					let r = res.data;
@@ -459,6 +465,7 @@
 				})
 			},
 			async editPayment(payment) {
+				this.editPress = "yes";
 				let keys = Object.keys(this.payment);
 				keys.forEach(key => {
 					this.payment[key] = payment[key];
@@ -500,6 +507,8 @@
 				let inst = this.installments.filter(q => q.installment_id == this.payment.installment_id)
 				this.installment = inst[0];
 
+				this.due = payment.due_previous
+
 			},
 			deletePayment(paymentId) {
 				let deleteConfirm = confirm('Are you sure?');
@@ -523,6 +532,7 @@
 				this.payment.CPayment_notes = '';
 				this.selectedAccount = null;
 				this.payment.CPayment_Paymentby = 'cash';
+				this.editPress = "";
 
 				this.selectedCustomer = {
 					display_name: 'Select Customer',
