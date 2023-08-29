@@ -131,6 +131,7 @@ $route['update_customer_payment'] = 'Administrator/Customer/updateCustomerPaymen
 $route['delete_customer_payment'] = 'Administrator/Customer/deleteCustomerPayment';
 $route['send_sms_due_customers'] = 'Administrator/Customer/sendSmsDueCustomers';
 
+$route['customer_installment_dateupdate'] = 'Administrator/Customer/installmentCollectionDateUpdate';
 $route['installment_collection'] = 'Administrator/Customer/installmentCollection';
 $route['installment_report'] = 'Administrator/Customer/installmentReport';
 $route['get_installment_due'] = 'Administrator/Customer/getCustomerInstallmentDue';

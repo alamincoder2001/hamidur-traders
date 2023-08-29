@@ -960,6 +960,20 @@ class Customer extends CI_Controller
         echo json_encode($invoices);
     }
 
+    public function installmentCollectionDateUpdate()
+    {
+        try {
+            $data = json_decode($this->input->raw_input_stream);
+            $this->db->where("installment_id", $data->installment_id);
+            $this->db->update("tbl_customer_installments", ['installment_date' => $data->installment_date]);
+            $res = ['success' => true, 'message' => 'Installment date update successfully'];
+            echo json_encode($res);
+        } catch (\Throwable $e) {
+            $res = ['success' => false, 'message' => $e->getMessage()];
+            echo json_encode($res);
+        }
+    }
+
     public function addInstallmentPayment()
     {
         $res = ['success' => false, 'message' => ''];

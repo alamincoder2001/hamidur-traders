@@ -108,6 +108,7 @@
 						<th style="text-align:center">Due Date</th>
 						<th style="text-align:center">Installment Amount</th>
 						<th style="text-align:center">Payment Amount</th>
+						<th style="text-align:center">Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -119,9 +120,19 @@
 							<td style="text-align:left;">{{ row.Customer_Name }}</td>
 							<td style="text-align:center;">{{ row.Customer_Mobile }}</td>
 							<td style="text-align:center;">{{ row.Customer_Address }}</td>
-							<td style="text-align:center;">{{ row.installment_date }}</td>
+							<td style="text-align:center;">
+								<div class="input-group" v-if="eyeShow == true && rowSl == sl">
+									<input type="date" v-model="row.installment_date" style="width: 115px;padding: 0 5px;" />
+									<button @click="updateDate(row)" style="padding: 0;color: #fdfdfd;background: #000b8f;">update</button>
+								</div>
+								<span v-else>{{ row.installment_date }}</span>
+							</td>
 							<td style="text-align:right;">{{ parseFloat(row.installment_amount).toFixed(2) }}</td>
 							<td style="text-align:right;">{{ parseFloat(row.paid).toFixed(2) }}</td>
+							<td>
+								<i v-if="eyeShow == true && rowSl == sl" @click="eyeToggle(sl)" class="fa fa-eye-slash" style="cursor: pointer;"></i>
+								<i v-else @click="eyeToggle(sl)" class="fa fa-eye" style="cursor: pointer;"></i>
+							</td>
 						</tr>
 					</template>
 				</tbody>
@@ -153,7 +164,9 @@
 				dateTo: null,
 				payments: [],
 				previousBalance: 0.00,
-				showTable: false
+				showTable: false,
+				eyeShow: false,
+				rowSl: '',
 			}
 		},
 		created() {
@@ -163,6 +176,32 @@
 			this.getReport();
 		},
 		methods: {
+			eyeToggle(sl) {
+				this.rowSl = '';
+				if (this.eyeShow) {
+					this.eyeShow = false
+				} else {
+					this.eyeShow = true;
+					this.rowSl = sl;
+				}
+			},
+
+			updateDate(rowData) {
+				let filter = {
+					installment_id: rowData.installment_id,
+					installment_date: rowData.installment_date
+				}
+				axios.post('/customer_installment_dateupdate', filter).then(res => {
+					if (res.data.success) {
+						alert(res.data.message);
+						this.eyeShow = false;
+						this.rowSl = '';
+						this.getReport();
+					}else{
+						console.log(res.data.message);
+					}
+				})
+			},
 			sendSMS() {
 				let customers = this.payments.filter(c => c.Customer_Mobile.length == 11 && c.paid == 0)
 				axios.post('/send_sms_due_customers', {
