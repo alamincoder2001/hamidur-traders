@@ -61,6 +61,17 @@ class Customer extends CI_Controller
             $customerTypeClause
             order by c.Customer_SlNo desc
         ", $this->session->userdata('BRANCHid'))->result();
+
+        foreach ($customers as $key => $item) {
+            $month = date('m');
+            $year = date("Y");
+            $sale = $this->db->query("SELECT sm.* FROM tbl_salesmaster sm WHERE sm.Status = 'a' AND month(sm.SaleMaster_SaleDate) = ? AND YEAR(sm.SaleMaster_SaleDate) = ? AND sm.SalseCustomer_IDNo = ?", [$month, $year, $item->Customer_SlNo])->row();
+            if (empty($sale)) {
+                $item->currentMnt = 'yes';
+            }else{
+                $item->currentMnt = 'no';
+            }
+        }
         echo json_encode($customers);
     }
 

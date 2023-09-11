@@ -118,7 +118,11 @@
 							<div class="form-group">
 								<label class="col-xs-4 control-label no-padding-right"> Customer </label>
 								<div class="col-xs-7">
-									<v-select v-bind:options="customers" label="display_name" v-model="selectedCustomer" v-on:input="customerOnChange"></v-select>
+									<v-select :options="customers" label="display_name" v-model="selectedCustomer" v-on:input="customerOnChange">
+										<template #option="option">
+											<span><span style="color: red;" v-if="option.currentMnt == 'yes'"><i class="fa fa-long-arrow-right"></i></span>{{ option.display_name }}</span>
+										</template>
+									</v-select>
 								</div>
 								<div class="col-xs-1" style="padding: 0;">
 									<a href="<?= base_url('customer') ?>" class="btn btn-xs btn-danger" style="height: 25px; border: 0; width: 27px; margin-left: -10px;" target="_blank" title="Add New Customer"><i class="fa fa-plus" aria-hidden="true" style="margin-top: 5px;"></i></a>
@@ -586,6 +590,7 @@
 					customerType: this.sales.salesType
 				}).then(res => {
 					this.customers = res.data;
+
 					this.customers.unshift({
 						Customer_SlNo: 'C01',
 						Customer_Code: '',

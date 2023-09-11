@@ -227,7 +227,7 @@
 				}
 
 				axios.post('/get_customer_payments_monthly', data).then(res => {
-					this.payments = res.data;
+					this.payments = res.data.filter(pay => parseFloat(pay.installment_amount) > parseFloat(pay.paid));
 				})
 			},
 			async print() {

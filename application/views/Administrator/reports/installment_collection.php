@@ -441,10 +441,10 @@
 					alert('Amount is required');
 					return;
 				}
-				if (this.payment.CPayment_TransactionType == 'CR' && parseFloat(this.payment.CPayment_amount) > parseFloat(this.due)) {
-					alert('Payment amount must be less than due amount');
-					return;
-				}
+				// if (this.payment.CPayment_TransactionType == 'CR' && parseFloat(this.payment.CPayment_amount) > parseFloat(this.due)) {
+				// 	alert('Payment amount must be less than due amount');
+				// 	return;
+				// }
 
 				this.payment.due_previous = this.due;
 				this.payment.CPayment_customerID = this.selectedCustomer.Customer_SlNo;
