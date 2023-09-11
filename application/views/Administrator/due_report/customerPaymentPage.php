@@ -99,8 +99,11 @@
 							<label class="col-md-4 control-label">Customer</label>
 							<label class="col-md-1">:</label>
 							<div class="col-md-6 col-xs-11">
-								<select class="form-control" v-if="customers.length == 0"></select>
-								<v-select v-bind:options="customers" v-model="selectedCustomer" label="display_name" @input="getCustomerDue" v-if="customers.length > 0"></v-select>
+								<v-select v-bind:options="customers" v-model="selectedCustomer" label="display_name" @input="getCustomerDue">
+									<template #option="option">
+										<span><span style="color: red;" v-if="option.currentMnt == 'yes'"><i class="fa fa-long-arrow-right"></i></span>{{ option.display_name }}</span>
+									</template>
+								</v-select>
 							</div>
 							<div class="col-md-1 col-xs-1" style="padding-left:0;margin-left: -3px;">
 								<a href="/customer" target="_blank" class="add-button"><i class="fa fa-plus"></i></a>

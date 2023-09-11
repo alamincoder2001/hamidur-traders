@@ -65,7 +65,7 @@ class Customer extends CI_Controller
         foreach ($customers as $key => $item) {
             $month = date('m');
             $year = date("Y");
-            $sale = $this->db->query("SELECT sm.* FROM tbl_salesmaster sm WHERE sm.Status = 'a' AND month(sm.SaleMaster_SaleDate) = ? AND YEAR(sm.SaleMaster_SaleDate) = ? AND sm.SalseCustomer_IDNo = ?", [$month, $year, $item->Customer_SlNo])->row();
+            $sale = $this->db->query("SELECT cp.* FROM tbl_customer_payment cp WHERE cp.CPayment_status = 'a' AND month(cp.CPayment_date) = ? AND YEAR(cp.CPayment_date) = ? AND cp.CPayment_customerID = ?", [$month, $year, $item->Customer_SlNo])->row();
             if (empty($sale)) {
                 $item->currentMnt = 'yes';
             }else{

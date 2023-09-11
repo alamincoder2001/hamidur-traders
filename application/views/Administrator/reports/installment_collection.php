@@ -89,7 +89,11 @@
 							<label class="col-md-1">:</label>
 							<div class="col-md-7">
 								<select class="form-control" v-if="customers.length == 0"></select>
-								<v-select v-bind:options="customers" v-model="selectedCustomer" label="display_name" @input="getCustomerInvoices" v-if="customers.length > 0"></v-select>
+								<v-select v-bind:options="customers" v-model="selectedCustomer" label="display_name" @input="getCustomerInvoices" v-if="customers.length > 0">
+									<template #option="option">
+										<span><span style="color: red;" v-if="option.currentMnt == 'yes'"><i class="fa fa-long-arrow-right"></i></span>{{ option.display_name }}</span>
+									</template>
+								</v-select>
 							</div>
 						</div>
 						<div class="form-group">
